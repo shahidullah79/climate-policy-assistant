@@ -494,8 +494,18 @@ class Engine {
         let sc=0; qs.forEach(t=>{ if(toks.has(t)) sc+=idf.get(t); });
         if (!sc) continue;
         const norm = normText(s); let bonus=1; for (const g of grams){ if (norm.includes(g)) bonus*=1.25; }
+        let ph=0; for (const g of grams){ if (norm.includes(g)) ph++; }
         sc = sc/Math.sqrt(Math.min(ws,45)) * Math.min(1.6,bonus) * share;
-        if (!best || sc>best.sc) best={sc,s:trim(s,45),hi};
+        const key = (ph?100:0)+sc;
+        if (!best || key>best.key) best={sc,key,ph,full:s,s:trim(s,45),hi};
+      }
+      if (!best || !best.ph){
+        // clause-level phrase match (lists separated by semicolons, fragments)
+        for (const c of h.p.t.replace(/\s+/g,' ').split(/(?<=[.;!?])\s+/)){
+          const cw = c.split(/\s+/).length; if (cw<5 || cw>80) continue;
+          const nc = normText(c); let n=0; for (const g of grams){ if (nc.includes(g)) n++; }
+          if (n && (!best || !best.ph || n>best.ph)){ best={sc:0.5*share,ph:n,full:c,s:trim(c.replace(/^[^A-Za-z0-9]+/,''),45),hi}; }
+        }
       }
       if (!best && hi<2){
         const lead = h.p.t.split(/\s+/).length>=8 ? trim(h.p.t.replace(/\s+/g,' '),45) : null;
@@ -503,10 +513,13 @@ class Engine {
       }
       if (best) scored.push(best);
     });
-    scored.sort((a,b)=>b.sc-a.sc);
+    scored.sort((a,b)=>(b.ph>0)-(a.ph>0) || b.sc-a.sc);
     const used = new Set(), first = [], rest = [];
     for (const x of scored){ const dk = hits[x.hi].doc.d; if (used.has(dk)) rest.push(x); else { used.add(dk); first.push(x); } }
-    return first.concat(rest).slice(0,max);
+    let out = first.concat(rest);
+    const withPhrase = out.filter(x=>x.ph>0);
+    if (withPhrase.length) out = withPhrase;
+    return out.slice(0,max);
   }
 }
 /* ===== END ENGINE ===== */
@@ -897,7 +910,17 @@ function extractiveText(q, res){
     const x = res.hits[0];
     return 'The closest passage is from '+short(x.doc)+' ('+x.doc.c+'). Open the first card to read it. [1]';
   }
-  return 'Here is what the closest passages say:\n'+picks.map(p=>{
+  const phr = picks.filter(p=>p.ph>0);
+  let lead = 'Here is what the closest passages say:';
+  if (phr.length){
+    const yn = /^\s*(do|does|did|is|are|was|were|has|have|will|can)\b/i.test(q);
+    const hedge = /\b(consider|considering|propose|proposed|explore|exploring|examine|study|assess|encourage|promote|aim|aims|intend|intends|plan to|may|might|could|should|would|will be introduced|to be introduced)\b/i;
+    const hedged = phr.some(p=>hedge.test(p.full));
+    lead = yn && hedged
+      ? 'These passages mention it, but with proposal wording such as \u201cconsider\u201d or \u201cshould\u201d, so they may describe a plan or option rather than something already in force. Check the sources:'
+      : 'Passages that mention your exact words:';
+  }
+  return lead+'\n'+picks.map(p=>{
     const d = res.hits[p.hi].doc;
     return '• '+d.c+', '+short(d)+(d.y>=1950?' ('+d.y+')':'')+': '+p.s+' ['+(p.hi+1)+']';
   }).join('\n');
