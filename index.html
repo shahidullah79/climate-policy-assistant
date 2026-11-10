@@ -1,0 +1,1100 @@
+<title>Rada Policy Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: radar-disc portrait of Rada on the left (sticky on desktop, compact row on phones), chat with source cards on the right. */
+:root{
+  --bg:#EAF0F1; --surface:#FFFFFF; --ink:#10252C; --muted:#4F656C; --line:#CBD8DB;
+  --accent:#0B7A85; --accent-ink:#FFFFFF; --signal:#B7740A; --quote-bg:#F2F7F7; --focus:#0B7A85; --mark:#F7E3A6;
+  --skin:#D8A27C; --skin-hi:#E6B895; --skin-sh:#C58A66; --hair:#1D1612; --hair-hi:#4A372B; --lip:#B65058; --lip-lo:#C4636A;
+  --iris:#4B2F1E; --outfit:#0B7A85; --outfit-2:#075C65; --ring:#CBD8DB;
+  --f-display:'Bricolage Grotesque','IBM Plex Sans',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A181D; --surface:#102830; --ink:#E4EFF1; --muted:#9BB1B8; --line:#22424B;
+    --accent:#4CC3CE; --accent-ink:#06191D; --signal:#E8B24A; --quote-bg:#0D2128; --focus:#4CC3CE; --mark:#5B4A12;
+    --outfit:#2A9BA6; --outfit-2:#1D7A84; --ring:#22424B; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A181D; --surface:#102830; --ink:#E4EFF1; --muted:#9BB1B8; --line:#22424B;
+  --accent:#4CC3CE; --accent-ink:#06191D; --signal:#E8B24A; --quote-bg:#0D2128; --focus:#4CC3CE; --mark:#5B4A12;
+  --outfit:#2A9BA6; --outfit-2:#1D7A84; --ring:#22424B; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);
+  padding-block:20px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px}
+h1{font:700 28px/1.1 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.tag{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.grid{display:grid;grid-template-columns:minmax(250px,330px) minmax(0,1fr);gap:18px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.stage{display:flex;flex-direction:column;gap:14px}
+@media(min-width:821px){.stage{position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}}
+.stage-top{display:flex;flex-direction:column;gap:12px}
+.side{display:flex;flex-direction:column;gap:10px;min-width:0}
+.avatar-box{width:100%;max-width:270px;margin:0 auto}
+svg.avatar{display:block;width:100%;height:auto;overflow:visible}
+.ring{fill:none;stroke:var(--ring);stroke-width:1.4}
+.cross{stroke:var(--ring);stroke-width:1}
+.sweep{fill:var(--accent);opacity:0;transform-origin:120px 128px;transition:opacity .3s}
+.thinking .sweep{opacity:.2;animation:spin 2.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.thinking .sweep{animation:none;opacity:.16}}
+.status{font:500 12px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;min-height:1.4em;display:flex;gap:8px;align-items:center;justify-content:center}
+.bars{display:none;gap:2px;align-items:flex-end;height:12px}
+.speaking .bars{display:inline-flex}
+.bars i{width:3px;background:var(--accent);border-radius:2px;height:4px;animation:bar .6s ease-in-out infinite alternate}
+.bars i:nth-child(2){animation-delay:.15s}.bars i:nth-child(3){animation-delay:.3s}
+@keyframes bar{to{height:12px}}
+@media(prefers-reduced-motion:reduce){.bars i{animation:none;height:8px}}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+.switch{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--accent)}
+button,.btn{font:500 13px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover,.btn:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+button[disabled]{opacity:.5;cursor:default}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.label{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border-radius:999px;padding:4px 10px;font-size:12.5px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip.rm::after{content:" \00d7";opacity:.8}
+.tools>summary{cursor:pointer;font-weight:600;font-size:14px;margin-bottom:12px}
+.toolsbody{display:flex;flex-direction:column;gap:14px}
+details.drawer{border-top:1px solid var(--line);padding-top:10px}
+details.drawer summary{cursor:pointer;font-weight:600;font-size:14px}
+textarea,input[type=text]{width:100%;font:13px/1.5 var(--f-mono);color:var(--ink);background:var(--quote-bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+textarea{resize:vertical}
+.small{font-size:12.5px;color:var(--muted)}
+.chat{display:flex;flex-direction:column;gap:14px}
+.scope{font:500 12px/1.5 var(--f-mono);color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.loadbar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
+.loadbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+#log{display:flex;flex-direction:column;gap:14px;min-height:200px}
+.msg{max-width:100%;min-width:0}
+.msg.user{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-radius:14px 14px 4px 14px;padding:9px 14px;max-width:85%}
+.msg.bot{display:flex;flex-direction:column;gap:10px}
+.answer{white-space:pre-wrap;overflow-wrap:anywhere}
+.cite{font:500 11px var(--f-mono);color:var(--accent-ink);background:var(--signal);border:0;border-radius:5px;padding:1px 5px;margin:0 1px;vertical-align:1px;cursor:pointer}
+.mode{font:500 11px/1.5 var(--f-mono);letter-spacing:.04em;color:var(--muted)}
+.sugg{display:flex;flex-wrap:wrap;gap:8px}
+.sugg button{text-align:left;border-radius:10px}
+.sources{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:7px;min-width:0;background:var(--surface)}
+.card.flash{animation:flash 1.4s}
+@keyframes flash{0%,60%{border-color:var(--signal);box-shadow:0 0 0 3px color-mix(in srgb,var(--signal) 35%,transparent)}100%{}}
+.card .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card .n{font:500 11px var(--f-mono);color:var(--accent-ink);background:var(--signal);border-radius:5px;padding:1px 6px}
+.card .type{font:500 11px var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 7px}
+.card .meta{font-weight:600;font-size:13.5px;overflow-wrap:anywhere}
+.card .sec{font:400 12px var(--f-mono);color:var(--muted)}
+.card blockquote{margin:0;background:var(--quote-bg);border-radius:6px;padding:8px 10px;font-size:13.5px;overflow-wrap:anywhere}
+.card blockquote.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.card mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.card .more{align-self:flex-start;font-size:12px;padding:2px 8px}
+.card a{font-size:12.5px;color:var(--accent);overflow-wrap:anywhere}
+form.composer{display:flex;gap:8px;align-items:flex-end}
+.mic{width:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;align-self:stretch}
+.mic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mic[aria-pressed="true"]{background:#c0392b;border-color:#c0392b;color:#fff;animation:micpulse 1.2s ease-in-out infinite}
+@keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.45)}50%{box-shadow:0 0 0 7px rgba(192,57,43,0)}}
+@media(prefers-reduced-motion:reduce){.mic[aria-pressed="true"]{animation:none}}
+.micmsg{font-size:12.5px;color:var(--muted);min-height:1.2em;margin:4px 0 0}
+form.composer textarea{flex:1;min-width:0;font:15px/1.4 var(--f-body);background:var(--surface)}
+.foot{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:820px){
+  .grid{grid-template-columns:1fr}
+  .stage-top{flex-direction:row;align-items:center}
+  .stage-top .avatar-box{width:104px;max-width:104px;margin:0;flex:none}
+  .side{flex:1}.status{justify-content:flex-start;text-align:left}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Rada Policy Desk</h1>
+    <span class="tag">Prototype</span>
+  </header>
+
+  <div class="grid">
+    <aside class="panel stage" aria-label="Rada and search settings">
+      <div class="stage-top">
+        <div class="avatar-box">
+          <svg class="avatar" id="avatar" viewBox="0 0 240 270" role="img" aria-label="Rada, the assistant, shown as an illustrated young woman">
+            <defs>
+              <clipPath id="mouthClip"><path id="mouthClipPath" d=""/></clipPath>
+              <radialGradient id="skinG" cx="50%" cy="42%" r="62%">
+                <stop offset="0" style="stop-color:var(--skin-hi)"/><stop offset="1" style="stop-color:var(--skin)"/>
+              </radialGradient>
+            </defs>
+            <circle class="ring" cx="120" cy="128" r="116"/>
+            <circle class="ring" cx="120" cy="128" r="84"/>
+            <circle class="ring" cx="120" cy="128" r="52"/>
+            <line class="cross" x1="2" y1="128" x2="238" y2="128"/>
+            <line class="cross" x1="120" y1="8" x2="120" y2="248"/>
+            <path class="sweep" d="M120 128 L120 12 A116 116 0 0 1 220 70 Z"/>
+            <g id="fig" style="transform-origin:120px 225px">
+              <path d="M58,118 C50,64 84,24 120,24 C156,24 190,64 182,118 C181,160 194,206 180,240 L60,240 C46,206 59,160 58,118 Z" style="fill:var(--hair)"/>
+              <path d="M103,176 L137,176 L141,228 C130,238 110,238 99,228 Z" style="fill:var(--skin-sh)"/>
+              <path d="M32,270 C38,236 76,222 120,220 C164,222 202,236 208,270 Z" style="fill:var(--outfit)"/>
+              <path d="M94,224 L120,254 L146,224 C136,232 104,232 94,224 Z" style="fill:var(--skin-sh)"/>
+              <path d="M94,224 L120,254 L146,224" fill="none" style="stroke:var(--outfit-2)" stroke-width="5" stroke-linejoin="round"/>
+              <ellipse cx="120" cy="198" rx="24" ry="7" style="fill:var(--skin-sh)" opacity=".55"/>
+              <ellipse cx="70" cy="122" rx="5.5" ry="10" style="fill:var(--skin)"/>
+              <ellipse cx="170" cy="122" rx="5.5" ry="10" style="fill:var(--skin)"/>
+              <path d="M70,112 C70,66 96,44 120,44 C144,44 170,66 170,112 C170,152 148,190 120,192 C92,190 70,152 70,112 Z" fill="url(#skinG)"/>
+              <ellipse cx="91" cy="144" rx="12" ry="7" style="fill:var(--lip)" opacity=".16"/>
+              <ellipse cx="149" cy="144" rx="12" ry="7" style="fill:var(--lip)" opacity=".16"/>
+              <g id="eyeL" style="transform-box:fill-box;transform-origin:50% 50%">
+                <ellipse cx="96" cy="114" rx="11" ry="7.2" fill="#fff"/>
+                <g class="iris"><circle cx="96" cy="114" r="5.6" style="fill:var(--iris)"/><circle cx="96" cy="114" r="2.7" fill="#140b07"/><circle cx="94" cy="112" r="1.5" fill="#fff" opacity=".9"/></g>
+                <path d="M84,114 C87,105 105,105 108,114" fill="none" stroke="#1b1109" stroke-width="2.3" stroke-linecap="round"/>
+                <path d="M84.5,113 L81.5,110.5" stroke="#1b1109" stroke-width="1.6" stroke-linecap="round"/>
+              </g>
+              <g id="eyeR" style="transform-box:fill-box;transform-origin:50% 50%">
+                <ellipse cx="144" cy="114" rx="11" ry="7.2" fill="#fff"/>
+                <g class="iris"><circle cx="144" cy="114" r="5.6" style="fill:var(--iris)"/><circle cx="144" cy="114" r="2.7" fill="#140b07"/><circle cx="142" cy="112" r="1.5" fill="#fff" opacity=".9"/></g>
+                <path d="M132,114 C135,105 153,105 156,114" fill="none" stroke="#1b1109" stroke-width="2.3" stroke-linecap="round"/>
+                <path d="M155.5,113 L158.5,110.5" stroke="#1b1109" stroke-width="1.6" stroke-linecap="round"/>
+              </g>
+              <g id="brows" fill="none" stroke-width="3.2" stroke-linecap="round" style="stroke:var(--hair)">
+                <path d="M84,98 C90,92 102,91 108,95"/><path d="M132,95 C138,91 150,92 156,98"/>
+              </g>
+              <path d="M120,126 C117,141 112,147 116,151 C119,153 124,153 126,150" fill="none" style="stroke:var(--skin-sh)" stroke-width="2.2" stroke-linecap="round"/>
+              <g id="mouth">
+                <path id="mInner" d="" fill="#3c1a1f"/>
+                <g clip-path="url(#mouthClip)">
+                  <rect id="mTeeth" x="100" y="160" width="40" height="0" rx="2" fill="#fbf7f2"/>
+                  <ellipse id="mTongue" cx="120" cy="172" rx="8" ry="0" fill="#c8606a"/>
+                </g>
+                <path id="mUp" d="" style="fill:var(--lip)"/>
+                <path id="mLo" d="" style="fill:var(--lip-lo)"/>
+              </g>
+              <path d="M66,114 C58,60 92,30 124,30 C160,30 184,62 174,114 C168,90 152,70 130,62 C112,78 88,90 66,114 Z" style="fill:var(--hair)"/>
+              <path d="M82,52 C100,38 130,34 150,42" fill="none" style="stroke:var(--hair-hi)" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>
+              <path d="M70,108 C61,140 61,180 72,218 C81,198 82,150 77,110 Z" style="fill:var(--hair)"/>
+              <path d="M170,108 C179,140 179,180 168,218 C159,198 158,150 163,110 Z" style="fill:var(--hair)"/>
+            </g>
+          </svg>
+        </div>
+        <div class="side">
+          <div class="status" id="status" aria-live="polite"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span><span id="statusText">Loading</span></div>
+          <div class="row">
+            <label class="switch"><input type="checkbox" id="voice" checked> Voice</label>
+            <button type="button" id="stop" disabled>Stop</button>
+          </div>
+        </div>
+      </div>
+
+      <details class="tools" id="tools" open>
+        <summary>Search settings</summary>
+        <div class="toolsbody">
+          <div>
+            <p class="label">Type</p>
+            <div class="chips" id="cats">
+              <button type="button" class="chip" data-cat="Law" aria-pressed="false">Laws</button>
+              <button type="button" class="chip" data-cat="Policy" aria-pressed="false">Policies and plans</button>
+            </div>
+          </div>
+          <div>
+            <p class="label">Limit to countries</p>
+            <label class="sr" for="cin">Add a country</label>
+            <input type="text" id="cin" list="clist" placeholder="Type a country, press Enter" autocomplete="off">
+            <datalist id="clist"></datalist>
+            <div class="chips" id="countries" style="margin-top:8px"></div>
+          </div>
+          <div class="drawer" id="vlangBox" hidden style="padding:8px 0">
+            <label class="small" for="vlang">Voice language (for asking by microphone)</label>
+            <select id="vlang">
+              <option value="">Automatic (browser language)</option>
+              <option value="en-US">English (US)</option><option value="en-GB">English (UK)</option>
+              <option value="en-IN">English (India)</option><option value="en-PK">English (Pakistan)</option>
+              <option value="ur-PK">Urdu</option><option value="es-ES">Spanish</option>
+              <option value="fr-FR">French</option><option value="pt-BR">Portuguese</option>
+            </select>
+          </div>
+          <details class="drawer">
+            <summary>Expert glossary</summary>
+            <p class="small">One rule per line: <span style="font-family:var(--f-mono)">term = related words</span>. When a question contains the term, the search also looks for the related words.</p>
+            <label class="sr" for="glossary">Glossary rules</label>
+            <textarea id="glossary" rows="10" spellcheck="false"></textarea>
+            <div class="row" style="margin-top:6px"><button type="button" id="resetGloss">Reset rules</button></div>
+          </details>
+          <details class="drawer">
+            <summary>About the data</summary>
+            <p class="small" id="corpusInfo"></p>
+            <p class="small">Source: Climate Policy Radar open data, a 2022 snapshot of national laws and policies, licensed CC BY 4.0. Texts are machine-extracted from the original documents and may contain errors. Laws and policies may have changed since 2022. The Paris Agreement excerpts come from the UNFCCC text.</p>
+          </details>
+        </div>
+      </details>
+    </aside>
+
+    <main class="panel chat">
+      <div>
+        <div class="scope" id="scope">Loading the document database…</div>
+        <div class="loadbar" id="loadbar"><i id="loadfill"></i></div>
+      </div>
+      <div id="log" aria-live="polite"></div>
+      <form class="composer" id="form">
+        <label class="sr" for="q">Your question</label>
+        <textarea id="q" rows="2" placeholder="Ask about a law, policy or plan…" disabled></textarea>
+        <button type="button" class="mic" id="mic" aria-pressed="false" aria-label="Ask by voice" title="Ask by voice" disabled hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+        <button class="primary" type="submit" id="send" disabled>Ask</button>
+      </form>
+      <p class="micmsg" id="micMsg" aria-live="polite"></p>
+      <div class="row">
+        <button type="button" id="copy">Copy chat</button>
+        <span class="small" id="copyMsg" aria-live="polite"></span>
+      </div>
+      <textarea id="copyBox" rows="6" readonly hidden aria-label="Chat text to copy"></textarea>
+    </main>
+  </div>
+
+  <div class="foot">
+    <span>Answers are drawn from the passages shown on the cards. Check the source before relying on a claim.</span>
+    <span>Data: Climate Policy Radar open data (CC BY 4.0). Independent prototype, not affiliated with or endorsed by Climate Policy Radar.</span>
+  </div>
+</div>
+
+<script>
+/* ===== ENGINE: retrieval over the corpus (no DOM) ===== */
+const STOP = new Set('a an and are as at be been by can could did do does for from has have how i in is it its of on or say says said that the their there these this those to was were what when where which who whom why will with would about into under between compare tell me show list give please also any all some most more much many'.split(' '));
+function stem(w){
+  if (w.length>5 && w.endsWith('ies')) return w.slice(0,-3)+'y';
+  if (w.length>6 && w.endsWith('ing')) return w.slice(0,-3);
+  if (w.length>5 && w.endsWith('ed')) return w.slice(0,-2);
+  if (w.length>4 && w.endsWith('es') && /(ss|sh|ch|x|z)es$/.test(w)) return w.slice(0,-2);
+  if (w.length>3 && w.endsWith('s') && !w.endsWith('ss') && !w.endsWith('us')) return w.slice(0,-1);
+  return w;
+}
+function tokenize(s){
+  return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').split(' ').filter(w=>w && !STOP.has(w)).map(stem);
+}
+const ALIAS = {
+  GBR:['uk','u k','britain','british','england','scotland','wales'], USA:['usa','u s a','america','american','united states'],
+  ARE:['uae','emirates'], KOR:['south korea','korea','korean'], PRK:['north korea'], RUS:['russian'], CIV:['ivory coast'],
+  CZE:['czech republic'], VNM:['viet nam','vietnamese'], LAO:['laos'], MMR:['burma'], EUR:['eu','europe','european'],
+  MKD:['macedonia'], COD:['drc','dr congo','democratic republic of the congo'], SWZ:['eswatini','swaziland'], TLS:['east timor','timor leste'],
+  PSE:['palestinian'], DEU:['german'], FRA:['french'], ESP:['spanish'], ITA:['italian'], CHN:['chinese'], IND:['indian'], PAK:['pakistani'],
+  KEN:['kenyan'], PHL:['philippine','filipino'], BGD:['bangladeshi'], NPL:['nepali','nepalese'], LKA:['sri lankan'], IDN:['indonesian'],
+  JPN:['japanese'], BRA:['brazilian'], MEX:['mexican'], NGA:['nigerian'], ZAF:['south african'], AUS:['australian'], CAN:['canadian'],
+  NLD:['netherlands','holland','dutch'], CHE:['swiss'], IRN:['iranian'], EGY:['egyptian'], TUR:['turkish','turkiye'], ETH:['ethiopian']
+};
+function normName(s){ return ' '+String(s).toLowerCase().replace(/\(.*?\)/g,' ').replace(/,\s*the\b/g,'').replace(/[^a-z0-9]+/g,' ').trim()+' '; }
+function normText(s){ return ' '+String(s).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().split(' ').map(stem).join(' ')+' '; }
+function parseGloss(text){
+  return String(text||'').split('\n').map(l=>l.trim()).filter(l=>l.includes('=')).map(l=>{
+    const i = l.indexOf('=');
+    return {term:l.slice(0,i).trim().toLowerCase(), words:tokenize(l.slice(i+1))};
+  }).filter(r=>r.term && r.words.length);
+}
+
+class Engine {
+  constructor(corpus){
+    this.D = corpus.docs;
+    this.P = corpus.p.map(r=>({di:r[0], pg:r[1], t:r[2], kind:r[3]||0, label:r[4]||''}));
+    this.countries = new Map();
+    this.D.forEach(d=>{ if(!this.countries.has(d.k)) this.countries.set(d.k,d.c); });
+    this.build();
+  }
+  build(){
+    const P=this.P, n=P.length, post=new Map();
+    this.len = new Uint16Array(n); let tot=0;
+    for (let i=0;i<n;i++){
+      const toks = tokenize(P[i].t); this.len[i]=Math.min(65535,toks.length); tot+=toks.length;
+      const tf = new Map(); for (const t of toks) tf.set(t,(tf.get(t)||0)+1);
+      for (const [t,f] of tf){
+        let e = post.get(t); if(!e){ e={ids:[],tfs:[]}; post.set(t,e); }
+        e.ids.push(i); e.tfs.push(f>255?255:f);
+      }
+    }
+    this.post = post; this.avg = tot/Math.max(1,n); this.N = n;
+    const dpost = new Map(); this.dlen = new Float32Array(this.D.length); let dt=0;
+    this.D.forEach((d,i)=>{
+      const toks = tokenize([d.d,d.d,(d.tags||[]).join(' '),d.t].join(' '));
+      this.dlen[i]=toks.length; dt+=toks.length;
+      const tf = new Map(); for (const t of toks) tf.set(t,(tf.get(t)||0)+1);
+      for (const [t,f] of tf){ let e=dpost.get(t); if(!e){ e={ids:[],tfs:[]}; dpost.set(t,e);} e.ids.push(i); e.tfs.push(f); }
+    });
+    this.dpost = dpost; this.davg = dt/Math.max(1,this.D.length);
+    this.aliasMap = [];
+    for (const [k,c] of this.countries){
+      const names = new Set([normName(c)]);
+      (ALIAS[k]||[]).forEach(a=>names.add(' '+a+' '));
+      names.forEach(nm=>this.aliasMap.push({k, nm}));
+    }
+    this.aliasMap.sort((a,b)=>b.nm.length-a.nm.length);
+  }
+  grams(q){
+    const raw = String(q).toLowerCase().replace(/[^a-z0-9\s]+/g,' ').split(/\s+/).filter(Boolean);
+    const out = new Set();
+    for (let n=2;n<=3;n++) for (let i=0;i+n<=raw.length;i++){
+      const g = raw.slice(i,i+n);
+      if (g.every(x=>STOP.has(x))) continue;
+      if (STOP.has(g[0]) || STOP.has(g[g.length-1])) continue;
+      out.add(' '+g.map(stem).join(' ')+' ');
+    }
+    return [...out];
+  }
+  countryOverview(k, selectedCats){
+    const picks = [];
+    const docs = this.D.map((d,i)=>({d,i})).filter(x=>x.d.k===k && (!selectedCats.size || selectedCats.has(this.catOf(x.d))));
+    const hasText = new Set(); this.P.forEach(p=>{ if(p.kind===0) hasText.add(p.di); });
+    docs.sort((a,b)=>(hasText.has(b.i)?1:0)-(hasText.has(a.i)?1:0) || (b.d.y||0)-(a.d.y||0));
+    for (const {i} of docs){ const p=this.P.find(p=>p.di===i && p.kind!==0); if(p) picks.push({p,doc:this.D[i],score:1}); if(picks.length>=6) break; }
+    return picks;
+  }
+  idf(t){ const e=this.post.get(t); const df=e?e.ids.length:0; return Math.log(1+(this.N-df+.5)/(df+.5)); }
+  detectCountries(q){
+    let s = ' '+String(q).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()+' ';
+    const found = [];
+    for (const {k,nm} of this.aliasMap){
+      if (nm.trim().length<2) continue;
+      if (s.includes(nm)){ if(!found.includes(k)) found.push(k); s = s.split(nm).join(' '); }
+    }
+    return found;
+  }
+  catOf(d){ return d.g || (d.t==='Law'||d.t==='Treaty'?'Law':'Policy'); }
+  search(q, opts={}){
+    const gloss = opts.gloss||[], selected = opts.countries||new Set(), cats = opts.cats||new Set();
+    const detected = this.detectCountries(q);
+    const nameToks = new Set();
+    detected.forEach(k=>{ tokenize(this.countries.get(k)).forEach(t=>nameToks.add(t)); (ALIAS[k]||[]).forEach(a=>tokenize(a).forEach(t=>nameToks.add(t))); });
+    const qw = new Map();
+    tokenize(q).forEach(t=>{ if(!nameToks.has(t)) qw.set(t,1); });
+    const ql = String(q).toLowerCase();
+    const expanded = [], glossPhrases = [];
+    gloss.forEach(r=>{ if (ql.includes(r.term) && r.term.includes(' ')) glossPhrases.push(r.term); });
+    gloss.forEach(r=>{ if (ql.includes(r.term)) r.words.forEach(w=>{ if(!qw.has(w)&&!nameToks.has(w)){ qw.set(w,.55); expanded.push(w);} }); });
+    const out = {hits:[], detected, expanded:[...new Set(expanded)], terms:[...qw.keys()], widened:false};
+    if (!qw.size){
+      if (detected.length===1){ out.hits=this.countryOverview(detected[0], cats); out.overview=true; out.filter=[detected[0]]; }
+      return out;
+    }
+    const run = (cf)=>{
+      const n=this.N, sc=new Float32Array(n), touched=[], k1=1.4, b=.75;
+      qw.forEach((w,t)=>{
+        const e=this.post.get(t); if(!e) return;
+        const idf=Math.log(1+(n-e.ids.length+.5)/(e.ids.length+.5));
+        for (let j=0;j<e.ids.length;j++){
+          const id=e.ids[j], f=e.tfs[j];
+          if (sc[id]===0) touched.push(id);
+          sc[id]+= w*idf*f*(k1+1)/(f+k1*(1-b+b*this.len[id]/this.avg));
+        }
+      });
+      const ds = new Map();
+      qw.forEach((w,t)=>{
+        const e=this.dpost.get(t); if(!e) return;
+        const idf=Math.log(1+(this.D.length-e.ids.length+.5)/(e.ids.length+.5));
+        for (let j=0;j<e.ids.length;j++){
+          const id=e.ids[j], f=e.tfs[j];
+          ds.set(id,(ds.get(id)||0)+w*idf*f*2.2/(f+1.2*(.5+.5*this.dlen[id]/this.davg)));
+        }
+      });
+      const wantsLaw = /\b(law|laws|act|acts|legislation|statute|legal|bill)\b/i.test(q);
+      const wantsPol = /\b(policy|policies|strategy|strategies|plan|plans|programme|programmes)\b/i.test(q);
+      const cand = [];
+      for (const id of touched){
+        const p=this.P[id], d=this.D[p.di];
+        if (cf.size && !cf.has(d.k)) continue;
+        const cat=this.catOf(d);
+        if (cats.size && !cats.has(cat)) continue;
+        let s = sc[id] + 0.45*(ds.get(p.di)||0);
+        if (p.kind===1) s*=1.12;
+        if (wantsLaw && cat==='Law') s*=1.1;
+        if (wantsPol && cat==='Policy') s*=1.1;
+        cand.push({id, s});
+      }
+      cand.sort((a,b)=>b.s-a.s);
+      const primary = [...qw.entries()].filter(([t,w])=>w===1).map(([t])=>t);
+      const unknownIdf = Math.log(1+(this.N+.5)/.5);
+      const pmass = primary.reduce((a,t)=>a+(this.post.has(t)?this.idf(t):unknownIdf),0) || 1;
+      const grams = this.grams(q);
+      glossPhrases.forEach(g=>{ const n=normText(g); if(!grams.includes(n)) grams.push(n); });
+      const top = cand.slice(0,150);
+      for (const c of top){
+        const pp0 = this.P[c.id];
+        const txt = normText(pp0.t);
+        const ttl = normText(this.D[pp0.di].d);
+        const tk = new Set(tokenize(pp0.t));
+        let m=0; primary.forEach(t=>{ if(tk.has(t)) m+=this.idf(t); });
+        c.cov = m/pmass;
+        let bonus=0, tb=0;
+        for (const g of grams){ if (txt.includes(g)) bonus+=0.2; if (ttl.includes(g)) tb+=0.3; }
+        c.s *= 1+Math.min(0.6,bonus)+Math.min(0.9,tb);
+      }
+      top.sort((a,b)=>b.s-a.s);
+      cand.splice(0,top.length,...top);
+      const best = top[0];
+      if (!best || best.s<7 || Math.max(...top.slice(0,8).map(c=>c.cov))<0.4) return [];
+      const K=6, perDoc=new Map(), picks=[], seenText=new Set(), perCountry=new Map();
+      const listQ = !cf.size && /\b(which|what) (countries|nations|governments|jurisdictions|states)\b|\bany countr(y|ies)\b|\bcountries (that|with|have|has|where)\b/i.test(q);
+      const take=(c)=>{
+        const pp=this.P[c.id]; const key=pp.t.slice(0,120).toLowerCase();
+        if (seenText.has(key)) return false;
+        if (listQ){ const kk=this.D[pp.di].k; if ((perCountry.get(kk)||0)>=1) return false; perCountry.set(kk,1); }
+        const m=perDoc.get(pp.di)||0; if(m>=2) return false;
+        seenText.add(key); perDoc.set(pp.di,m+1); picks.push(c); return true;
+      };
+      if (cf.size>=2 && cf.size<=4){
+        const quota = Math.max(2,Math.floor(K/cf.size));
+        const cnt = new Map();
+        for (const c of cand){ const kk=this.D[this.P[c.id].di].k; if((cnt.get(kk)||0)>=quota) continue; if(take(c)) cnt.set(kk,(cnt.get(kk)||0)+1); if(picks.length>=K) break; }
+        for (const c of cand){ if(picks.length>=K) break; if(!picks.includes(c)) take(c); }
+      } else {
+        for (const c of cand){ if(picks.length>=K) break; take(c); }
+      }
+      picks.sort((a,b)=>b.s-a.s);
+      return picks;
+    };
+    let cf = selected.size ? new Set(selected) : new Set(detected);
+    let picks = run(cf);
+    if (!picks.length && cf.size) out.countryMiss = [...cf].map(k=>this.countries.get(k));
+    out.filter = [...cf];
+    out.hits = picks.map(c=>({p:this.P[c.id], doc:this.D[this.P[c.id].di], score:c.s}));
+    return out;
+  }
+  sentences(text){
+    const parts=[]; let cur='';
+    const toks = String(text).split(/(\s+)/);
+    for (const tk of toks){
+      cur += tk;
+      if (/[.!?]["”’)]?$/.test(tk.trim()) && tk.trim().length>3 && !/^(no|art|sec|s|p|pp|vol|fig|dr|mr|mrs|st|e\.g|i\.e|etc|cf)\.$/i.test(tk.trim())){ parts.push(cur.trim()); cur=''; }
+    }
+    if (cur.trim()) parts.push(cur.trim());
+    return parts;
+  }
+  extract(q, hits, terms, max=4){
+    const qs = new Set(terms && terms.length ? terms : tokenize(q));
+    const idf = new Map(); qs.forEach(t=>idf.set(t,this.idf(t)));
+    const grams = this.grams(q);
+    const top = hits.length ? hits[0].score : 1;
+    const trim = (s,n)=>{ const w=s.split(/\s+/); if (w.length<=n) return s; let cut=w.slice(0,n).join(' '); const k=Math.max(cut.lastIndexOf(', '),cut.lastIndexOf('; ')); if (k>n*3) cut=cut.slice(0,k); return cut.replace(/[,;:]$/,'')+' \u2026'; };
+    const scored = [];
+    hits.forEach((h,hi)=>{
+      const share = Math.pow(Math.max(0.05,h.score/top),1.5);
+      let best=null;
+      for (const s of this.sentences(h.p.t)){
+        const ws = s.split(/\s+/).length;
+        if (ws<8 || ws>140) continue;
+        if (!/^[A-Z0-9\u201c"(\u2018']/.test(s) || !/[.!?:]["\u201d\u2019)]?$/.test(s)) continue;
+        if (/https?:|www\.|\bet al\b|\bpp?\.\s*\d|\u00a9/i.test(s)) continue;
+        const wl = s.split(/\s+/); const caps = wl.filter(w=>/^[A-Z]/.test(w)).length;
+        if (caps/wl.length>0.5 || (s.match(/,/g)||[]).length>wl.length/4) continue;
+        const toks = new Set(tokenize(s));
+        let sc=0; qs.forEach(t=>{ if(toks.has(t)) sc+=idf.get(t); });
+        if (!sc) continue;
+        const norm = normText(s); let bonus=1; for (const g of grams){ if (norm.includes(g)) bonus*=1.25; }
+        sc = sc/Math.sqrt(Math.min(ws,45)) * Math.min(1.6,bonus) * share;
+        if (!best || sc>best.sc) best={sc,s:trim(s,45),hi};
+      }
+      if (!best && hi<2){
+        const lead = h.p.t.split(/\s+/).length>=8 ? trim(h.p.t.replace(/\s+/g,' '),45) : null;
+        if (lead) best = {sc:0.3*share, s:lead, hi};
+      }
+      if (best) scored.push(best);
+    });
+    scored.sort((a,b)=>b.sc-a.sc);
+    const used = new Set(), first = [], rest = [];
+    for (const x of scored){ const dk = hits[x.hi].doc.d; if (used.has(dk)) rest.push(x); else { used.add(dk); first.push(x); } }
+    return first.concat(rest).slice(0,max);
+  }
+}
+/* ===== END ENGINE ===== */
+if (typeof module!=='undefined') module.exports = {Engine, tokenize, parseGloss, stem};
+
+/* ===== LIPSYNC: text -> viseme timeline, synced to speech boundary events (no DOM) ===== */
+const VIS = {
+  rest: {open:0.00, wide:0.35, round:0.00, tuck:0, press:0.12, tongue:0, smile:0.6},
+  gap:  {open:0.10, wide:0.40, round:0.00, tuck:0, press:0.00, tongue:0, smile:0.3},
+  AA:   {open:1.00, wide:0.55, round:0.00, tuck:0, press:0, tongue:0, smile:0.1},
+  E:    {open:0.55, wide:0.90, round:0.00, tuck:0, press:0, tongue:0, smile:0.3},
+  IH:   {open:0.26, wide:1.00, round:0.00, tuck:0, press:0, tongue:0, smile:0.5},
+  OH:   {open:0.72, wide:0.00, round:0.85, tuck:0, press:0, tongue:0, smile:0.0},
+  OO:   {open:0.30, wide:0.00, round:1.00, tuck:0, press:0, tongue:0, smile:0.0},
+  MBP:  {open:0.00, wide:0.25, round:0.00, tuck:0, press:1.00, tongue:0, smile:0.0},
+  FV:   {open:0.16, wide:0.55, round:0.00, tuck:1, press:0, tongue:0, smile:0.1},
+  LT:   {open:0.38, wide:0.55, round:0.00, tuck:0, press:0, tongue:1, smile:0.1},
+  SZ:   {open:0.14, wide:0.85, round:0.00, tuck:0, press:0, tongue:0, smile:0.3},
+  SH:   {open:0.22, wide:0.15, round:0.75, tuck:0, press:0, tongue:0, smile:0.0},
+  KG:   {open:0.36, wide:0.45, round:0.00, tuck:0, press:0, tongue:0, smile:0.1},
+  R:    {open:0.30, wide:0.20, round:0.55, tuck:0, press:0, tongue:0, smile:0.0}
+};
+const VIS_NAMES = Object.keys(VIS);
+const LETTER_NAMES = {a:'ay',b:'bee',c:'see',d:'dee',e:'ee',f:'eff',g:'jee',h:'aych',i:'eye',j:'jay',k:'kay',l:'el',m:'em',n:'en',o:'oh',p:'pee',q:'queue',r:'ar',s:'ess',t:'tee',u:'you',v:'vee',w:'double you',x:'ex',y:'why',z:'zee'};
+const ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function numWords(n){
+  if (n<20) return ONES[n];
+  if (n<100) return TENS[Math.floor(n/10)] + (n%10 ? ' '+ONES[n%10] : '');
+  if (n<1000) return ONES[Math.floor(n/100)]+' hundred'+(n%100 ? ' '+numWords(n%100) : '');
+  if (n<1e6) return numWords(Math.floor(n/1000))+' thousand'+(n%1000 ? ' '+numWords(n%1000) : '');
+  return numWords(Math.floor(n/1e6))+' million'+(n%1e6 ? ' '+numWords(n%1e6) : '');
+}
+function yearWords(n){
+  if (n>=2000 && n<=2009) return n===2000 ? 'two thousand' : 'two thousand '+numWords(n-2000);
+  const a=Math.floor(n/100), b=n%100;
+  return numWords(a)+' '+(b===0 ? 'hundred' : (b<10 ? 'oh '+numWords(b) : numWords(b)));
+}
+const KEEP_CAPS = new Set(['I','A','US','UN','OK']);
+// letter groups -> visemes, longest match first
+const RULES = [
+  ['tion',['SH','IH','LT']],['sion',['SH','IH','LT']],['ough',['OH']],['augh',['OH']],['igh',['AA','IH']],
+  ['th',['LT']],['sh',['SH']],['ch',['SH']],['ph',['FV']],['wh',['OO']],['ng',['KG']],['ck',['KG']],['qu',['KG','OO']],
+  ['oo',['OO']],['ou',['AA','OO']],['ow',['AA','OO']],['au',['OH']],['aw',['OH']],['ai',['E','IH']],['ay',['E','IH']],
+  ['ee',['IH']],['ea',['IH']],['ie',['IH']],['oa',['OH']],['oe',['OH']],['ei',['E','IH']],['ey',['E','IH']],
+  ['ue',['OO']],['ew',['OO']],['ui',['OO']],['oi',['OH','IH']],['oy',['OH','IH']],['ll',['LT']],['ss',['SZ']],['tt',['LT']],
+  ['dd',['LT']],['nn',['LT']],['mm',['MBP']],['pp',['MBP']],['bb',['MBP']],['ff',['FV']],['rr',['R']]
+];
+const SINGLE = {a:'AA',e:'E',i:'IH',o:'OH',u:'AA',y:'IH',b:'MBP',p:'MBP',m:'MBP',f:'FV',v:'FV',l:'LT',t:'LT',d:'LT',n:'LT',
+  s:'SZ',z:'SZ',x:'SZ',j:'SH',k:'KG',q:'KG',h:'KG',g:'KG',c:'KG',r:'R',w:'OO'};
+const VOWELS = new Set(['AA','E','IH','OH','OO']);
+function wordToVis(word){
+  let w = word.toLowerCase().replace(/[^a-z]/g,'');
+  if (!w) return [];
+  if (w.length>3 && /[^aeiouy]e$/.test(w) && !/(ee|le)$/.test(w)) w = w.slice(0,-1);
+  if (/^kn/.test(w)) w = w.slice(1);
+  if (/^wr/.test(w)) w = 'r'+w.slice(2);
+  const out = [];
+  for (let i=0;i<w.length;){
+    let hit = null;
+    for (const [g,v] of RULES){ if (w.startsWith(g,i)){ hit=[g,v]; break; } }
+    if (hit){ hit[1].forEach(v=>out.push(v)); i+=hit[0].length; continue; }
+    const ch = w[i];
+    if (ch==='c' && /[eiy]/.test(w[i+1]||'')) out.push('SZ');
+    else if (ch==='g' && /[eiy]/.test(w[i+1]||'') && i>0) out.push('SH');
+    else if (ch==='x') { out.push('KG'); out.push('SZ'); }
+    else if (ch==='u' && /[aeiou]/.test(w[i+1]||'')) out.push('OO');
+    else if (ch==='h' && i>0 && /[ct]/.test(w[i-1])) { /* handled by digraph */ }
+    else out.push(SINGLE[ch]||'KG');
+    i++;
+  }
+  // collapse repeats
+  return out.filter((v,i)=>i===0||v!==out[i-1]);
+}
+function weightOf(v){ return v==='AA'?1.25 : VOWELS.has(v)?1.0 : v==='MBP'?0.7 : 0.55; }
+function buildTimeline(text){
+  const units = [], words = [];
+  const re = /([A-Za-z]+(?:['’][A-Za-z]+)*)|(\d[\d,]*(?:\.\d+)?%?)|([.,;:!?])/g;
+  let m, first = true;
+  const pushWord = (parts, c0, c1)=>{
+    if (!first) units.push({v:'gap', w:0.3});
+    first = false;
+    const u0 = units.length;
+    parts.forEach(p=>wordToVis(p).forEach(v=>units.push({v, w:weightOf(v)})));
+    if (units.length===u0) units.push({v:'gap', w:0.4});
+    words.push({c0, c1, u0, u1:units.length});
+  };
+  while ((m = re.exec(text))){
+    const c0 = m.index, c1 = m.index + m[0].length;
+    if (m[1]){
+      const w = m[1];
+      if (/^[A-Z]{2,6}$/.test(w) && !KEEP_CAPS.has(w)) pushWord(w.toLowerCase().split('').map(ch=>LETTER_NAMES[ch]), c0, c1);
+      else pushWord([w.replace(/['’]/g,'')], c0, c1);
+    } else if (m[2]){
+      let t = m[2], pct = false;
+      if (t.endsWith('%')){ pct = true; t = t.slice(0,-1); }
+      const plain = t.replace(/,/g,'');
+      let spoken;
+      if (/^\d+$/.test(plain)){ const n = +plain; spoken = (n>=1100 && n<=2099 && !t.includes(',')) ? yearWords(n) : (n<1e9 ? numWords(n) : plain.split('').map(d=>ONES[+d]).join(' ')); }
+      else spoken = plain.split('').map(d=>d==='.'?'point':ONES[+d]).join(' ');
+      if (pct) spoken += ' percent';
+      pushWord(spoken.split(' '), c0, c1);
+    } else {
+      const p = m[3];
+      units.push({v:'rest', w: p==='.'||p==='!'||p==='?' ? 4 : (p===':'||p===';' ? 2.6 : 2.0)});
+      first = true;
+    }
+  }
+  const cum = new Float64Array(units.length+1);
+  units.forEach((u,i)=>{ cum[i+1] = cum[i]+u.w; });
+  return {units, words, cum, total:cum[units.length]};
+}
+function clamp(x,a,b){ return Math.max(a,Math.min(b,x)); }
+class Player {
+  constructor(){ this.tl = null; this.state='idle'; this.scale=85; }
+  load(text, scale){ this.tl = buildTimeline(text); this.scale = scale||85; this.state='idle'; this.hasB=false; this.lastB=null; this.curW=-1; }
+  start(now){ this.state='play'; this.aPos=0; this.aT=now; this.startT=now; this.hasB=false; this.lastB=null; this.curW=-1; }
+  stop(){ this.state='idle'; }
+  wordAt(charIndex){
+    const ws = this.tl.words; let idx=-1;
+    for (let i=0;i<ws.length;i++){ if (ws[i].c0<=charIndex && charIndex<ws[i].c1){ idx=i; break; } if (ws[i].c0>=charIndex){ idx=i; break; } }
+    return idx;
+  }
+  boundary(charIndex, now){
+    if (this.state!=='play') return;
+    const i = this.wordAt(charIndex); if (i<0) return;
+    const pos = this.tl.cum[this.tl.words[i].u0];
+    if (this.lastB && pos>this.lastB.pos+0.5){
+      const dW = pos-this.lastB.pos, dT = now-this.lastB.t;
+      if (dT>30) this.scale = clamp(0.6*this.scale+0.4*(dT/dW), 40, 160);
+    }
+    this.lastB = {pos, t:now}; this.aPos = pos; this.aT = now; this.hasB = true; this.curW = i;
+  }
+  posAt(now){
+    let p = this.aPos + (now-this.aT)/this.scale;
+    if (this.hasB && this.curW>=0){
+      const w = this.tl.words[this.curW];
+      p = Math.min(p, this.tl.cum[w.u1] + 0.6);
+    }
+    return Math.min(p, this.tl.total);
+  }
+  done(now){ return this.state==='play' && !this.hasB && this.posAt(now)>=this.tl.total-1e-6; }
+  /* viseme name to show at time `now` (looks ~35 ms ahead so the lips lead the sound, as real lips do) */
+  visemeAt(now, lead=35){
+    if (this.state!=='play' || !this.tl) return 'rest';
+    const p = this.posAt(now+lead);
+    const cum = this.tl.cum; let lo=0, hi=this.tl.units.length-1;
+    if (p>=this.tl.total) return 'rest';
+    while (lo<hi){ const mid=(lo+hi+1)>>1; if (cum[mid]<=p) lo=mid; else hi=mid-1; }
+    return this.tl.units[lo].v;
+  }
+}
+/* ===== END LIPSYNC ===== */
+if (typeof module!=='undefined') module.exports = {buildTimeline, Player, VIS, wordToVis, numWords, yearWords};
+
+
+/* ===== PAGE ===== */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+function h(tag, attrs, ...kids){
+  const el = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs||{})){
+    if (k==='class') el.className = v; else if (k==='text') el.textContent = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k,v);
+  }
+  for (const kid of kids.flat()) if (kid!=null) el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  return el;
+}
+let engine = null, history = [], busy = false;
+const selCountries = new Set(), selCats = new Set();
+
+/* ---------- avatar: mouth drawing ---------- */
+const av = $('avatar');
+const E = {
+  fig:$('fig'), eyeL:$('eyeL'), eyeR:$('eyeR'), brows:$('brows'),
+  inner:$('mInner'), clip:$('mouthClipPath'), teeth:$('mTeeth'), tongue:$('mTongue'), up:$('mUp'), lo:$('mLo'),
+  irises:[...av.querySelectorAll('.iris')]
+};
+const f2 = n => n.toFixed(2);
+function drawMouth(m){
+  const cx=120, cy=169;
+  const hw = 16.5 + 5.5*m.wide - 7*m.round - 1.8*m.press;
+  const oh = 13.5*m.open;
+  const cyc = cy - m.smile*(1-Math.min(1,m.open*1.4))*2.6;
+  const ut = 3.1 + 1.3*m.round + 1.0*m.press, lt = 4.0 + 1.5*m.round + 1.0*m.press;
+  const uy = cy, ly = cy + oh - m.tuck*1.6;
+  const L = cx-hw, R = cx+hw;
+  const cu = 2*uy - cyc, cl = 2*ly - cyc;
+  const inner = `M${f2(L)},${f2(cyc)} Q${cx},${f2(cu)} ${f2(R)},${f2(cyc)} Q${cx},${f2(cl)} ${f2(L)},${f2(cyc)} Z`;
+  E.inner.setAttribute('d', inner); E.clip.setAttribute('d', inner);
+  const tw = hw*1.3, th = Math.max(0, Math.min(m.open*8, 6.4)) + m.tuck*2.4;
+  E.teeth.setAttribute('x', f2(cx-tw/2)); E.teeth.setAttribute('width', f2(tw)); E.teeth.setAttribute('y', f2(uy-0.5)); E.teeth.setAttribute('height', f2(th));
+  const tongueUp = m.tongue;
+  E.tongue.setAttribute('cx', cx); E.tongue.setAttribute('cy', f2(tongueUp>0.5 ? uy+oh*0.45+1.5 : ly-1));
+  E.tongue.setAttribute('rx', f2(hw*0.5)); E.tongue.setAttribute('ry', f2(Math.max(0, Math.min(oh*0.34, 4)) * (m.open>0.12?1:0)));
+  const yTop = uy-ut;
+  const bowY = (cyc+ (yTop-1.6))/2;
+  const upper = `M${f2(L)},${f2(cyc)} C${f2(L+hw*0.45)},${f2(bowY-1.2)} ${f2(cx-3.2)},${f2(yTop-2.2)} ${cx},${f2(yTop-0.9)} C${f2(cx+3.2)},${f2(yTop-2.2)} ${f2(R-hw*0.45)},${f2(bowY-1.2)} ${f2(R)},${f2(cyc)} Q${cx},${f2(cu)} ${f2(L)},${f2(cyc)} Z`;
+  const Y = (ly+lt - 0.25*cyc)/0.75;
+  const lower = `M${f2(L)},${f2(cyc)} Q${cx},${f2(cl)} ${f2(R)},${f2(cyc)} C${f2(R-hw*0.25)},${f2(Y)} ${f2(L+hw*0.25)},${f2(Y)} ${f2(L)},${f2(cyc)} Z`;
+  E.up.setAttribute('d', upper); E.lo.setAttribute('d', lower);
+}
+
+/* ---------- avatar: animation loop ---------- */
+const player = new Player();
+let avState = 'idle';
+let cur = {...VIS.rest}, blinkV = 0, nextBlink = performance.now()+2200, blinkStart = -1;
+let gx = 0, gy = 0, browV = 0, lastT = performance.now(), silentDone = null;
+const KEYS = ['open','wide','round','tuck','press','tongue','smile'];
+function setState(state, text){
+  avState = state;
+  av.classList.toggle('thinking', state==='thinking');
+  document.body.classList.toggle('speaking', state==='speaking');
+  av.parentElement.classList.toggle('speaking', state==='speaking');
+  $('status').classList.toggle('speaking', state==='speaking');
+  $('statusText').textContent = text || ({idle:'Ready', thinking:'Searching…', speaking:'Speaking', listening:'Listening…'}[state]);
+  $('stop').disabled = state!=='speaking';
+}
+function loop(now){
+  const dt = Math.min(0.05,(now-lastT)/1000); lastT = now;
+  let vis = 'rest';
+  if (player.state==='play') vis = player.visemeAt(now);
+  const tg = VIS[vis];
+  for (const k of KEYS){
+    const closing = (k==='open' && tg.open<cur.open) ;
+    const tau = (k==='press'||closing) ? 0.032 : 0.05;
+    cur[k] += (tg[k]-cur[k]) * (1-Math.exp(-dt/tau));
+  }
+  drawMouth(cur);
+  if (blinkStart<0 && now>=nextBlink){ blinkStart = now; }
+  if (blinkStart>=0){
+    const p = (now-blinkStart)/150;
+    blinkV = p<1 ? Math.sin(p*Math.PI) : 0;
+    if (p>=1){ blinkStart=-1; nextBlink = now + 2200 + Math.random()*3200; }
+  }
+  const sc = `scale(1,${f2(1-0.92*blinkV)})`;
+  E.eyeL.style.transform = sc; E.eyeR.style.transform = sc;
+  const thinking = avState==='thinking', speaking = player.state==='play';
+  const tgx = thinking ? 2.4 : (speaking ? Math.sin(now/1700)*1.0 : Math.sin(now/3100)*0.8);
+  const tgy = thinking ? -2.0 : (speaking ? 0.3 : 0);
+  gx += (tgx-gx)*0.08; gy += (tgy-gy)*0.08;
+  E.irises.forEach(el=>el.setAttribute('transform',`translate(${f2(gx)} ${f2(gy)})`));
+  const tbrow = thinking ? -3.2 : (speaking ? -1.0*Math.max(0,Math.sin(now/900)) - cur.open*0.8 : 0);
+  browV += (tbrow-browV)*0.1;
+  E.brows.setAttribute('transform',`translate(0 ${f2(browV)})`);
+  const sway = speaking ? Math.sin(now/1300)*1.1 + cur.open*0.5 : Math.sin(now/2600)*0.5;
+  const bob = speaking ? cur.open*1.2 : Math.sin(now/2100)*0.5;
+  E.fig.style.transform = `rotate(${f2(sway)}deg) translateY(${f2(bob)}px)`;
+  if (silentDone && player.done(now)){ const cb = silentDone; silentDone = null; player.stop(); cb(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- speech ---------- */
+const synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
+let voiceObj = null, speakToken = 0;
+const FEM = /samantha|karen|moira|tessa|serena|victoria|allison|ava\b|susan|zira|aria|jenny|libby|sonia|female|fiona|catherine|stephanie|google uk english female|google us english/i;
+const BADV = /novelty|eloquence|whisper|bells|bubbles|cellos|organ|zarvox|trinoids|boing|bahh|albert|fred|junior|ralph|kathy|bad news|good news|jester|superstar|wobble|deranged|hysterical/i;
+function loadVoice(){
+  if (!synth) return;
+  let bad = []; try { bad = JSON.parse(store.get('rada.nob')||'[]'); } catch(e){}
+  const vs = synth.getVoices().filter(v=>/^en/i.test(v.lang));
+  const score = v => (v.localService?10:0) + (FEM.test(v.name)?6:0) + (bad.includes(v.voiceURI)?-25:0) + (/en[-_](US|GB)/i.test(v.lang)?2:0) - (BADV.test(v.name)?40:0);
+  vs.sort((a,b)=>score(b)-score(a));
+  voiceObj = vs[0] || null;
+}
+loadVoice(); if (synth && synth.addEventListener) synth.addEventListener('voiceschanged', loadVoice);
+const scaleKey = () => 'rada.sc.'+(voiceObj?voiceObj.voiceURI:'default');
+function scaleNow(){ const v = parseFloat(store.get(scaleKey())); return v>40 && v<160 ? v : 85; }
+function voiceOn(){ return $('voice').checked; }
+function splitChunks(text){
+  const sents = text.replace(/\s+/g,' ').match(/[^.!?]+[.!?]?/g) || [text];
+  const out = [];
+  for (let s of sents){ s = s.trim(); if(!s) continue; while (s.length>230){ let k = s.lastIndexOf(',',200); if (k<80) k = s.lastIndexOf(' ',200); out.push(s.slice(0,k+1).trim()); s = s.slice(k+1).trim(); } out.push(s); }
+  return out;
+}
+function stopSpeech(){
+  speakToken++; silentDone = null; player.stop();
+  if (synth) { try { synth.cancel(); } catch(e){} }
+  if (avState==='speaking') setState('idle');
+}
+function speak(text){
+  stopSpeech();
+  if (!voiceOn()) { setState('idle'); return; }
+  const chunks = splitChunks(text);
+  const token = ++speakToken;
+  let i = 0, useTTS = !!synth, learnedScale = scaleNow(), noBoundaryChunks = 0;
+  setState('speaking');
+  const next = () => {
+    if (token!==speakToken) return;
+    if (i>=chunks.length){ player.stop(); setState('idle'); return; }
+    const txt = chunks[i++];
+    player.load(txt, learnedScale);
+    if (!useTTS){ player.start(performance.now()); silentDone = next; return; }
+    const u = new SpeechSynthesisUtterance(txt);
+    if (voiceObj){ u.voice = voiceObj; u.lang = voiceObj.lang; } else u.lang = 'en-US';
+    u.rate = 1; u.pitch = 1.08;
+    let started = false, t0 = 0;
+    const wd = setTimeout(()=>{
+      if (!started && token===speakToken){ try { synth.cancel(); } catch(e){} useTTS = false; setState('speaking','Speaking (sound blocked)'); i--; next(); }
+    }, 3000);
+    u.onstart = ()=>{ started = true; clearTimeout(wd); t0 = performance.now(); player.start(t0); };
+    u.onboundary = e=>{ if (!e.name || e.name==='word') player.boundary(e.charIndex, performance.now()); };
+    const fin = ()=>{
+      clearTimeout(wd); if (token!==speakToken) return;
+      if (started && !player.hasB && player.tl.words.length>=4){
+        const dur = performance.now()-t0-120;
+        const meas = clamp(dur/player.tl.total, 40, 160);
+        learnedScale = 0.5*learnedScale+0.5*meas; store.set(scaleKey(), String(learnedScale.toFixed(1)));
+        noBoundaryChunks++;
+        if (noBoundaryChunks===1 && voiceObj){
+          let bad=[]; try { bad=JSON.parse(store.get('rada.nob')||'[]'); } catch(e){}
+          if (!bad.includes(voiceObj.voiceURI)){ bad.push(voiceObj.voiceURI); store.set('rada.nob', JSON.stringify(bad.slice(-8))); }
+        }
+      }
+      player.stop(); next();
+    };
+    u.onend = fin; u.onerror = fin;
+    synth.speak(u);
+  };
+  next();
+}
+$('stop').addEventListener('click', stopSpeech);
+$('voice').addEventListener('change', e=>{ store.set('rada.voice', e.target.checked?'1':'0'); if(!e.target.checked) stopSpeech(); });
+if (store.get('rada.voice')==='0') $('voice').checked = false;
+if (!synth) $('voice').parentElement.append(' (animated only: no sound in this browser)');
+window.addEventListener('pagehide', stopSpeech);
+
+/* ---------- rendering ---------- */
+const log = $('log');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function showEl(el){ el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'}); }
+function renderAnswer(container, text, cards){
+  container.textContent = '';
+  text.split(/(\[\d+\])/g).forEach(part=>{
+    const m = part.match(/^\[(\d+)\]$/);
+    if (m && cards[+m[1]-1]){
+      container.append(h('button',{type:'button',class:'cite','aria-label':'Show source '+m[1],onclick:()=>{
+        const c = cards[+m[1]-1]; c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); showEl(c);
+      }}, m[1]));
+    } else if (part) container.append(part);
+  });
+}
+function highlight(text, stems){
+  const frag = document.createDocumentFragment();
+  text.split(/([A-Za-z][A-Za-z\-']+)/).forEach(tok=>{
+    if (/^[A-Za-z]/.test(tok) && stems.has(stem(tok.toLowerCase()))) frag.append(h('mark',{text:tok}));
+    else frag.append(tok);
+  });
+  return frag;
+}
+function sourceCard(hit, n, stems){
+  const d = hit.doc, p = hit.p;
+  const where = p.label || (p.pg ? 'p. '+p.pg : 'Climate Policy Radar summary');
+  const long = p.t.length>420;
+  const bq = h('blockquote', {class: long?'clamp':''});
+  bq.append(highlight(p.t, stems));
+  const card = h('div',{class:'card'},
+    h('div',{class:'top'}, h('span',{class:'n',text:String(n)}), d.t ? h('span',{class:'type',text:d.t}) : null),
+    h('div',{class:'meta',text:d.d}),
+    h('div',{class:'sec',text:[d.c, d.y>=1950?String(d.y):'', where].filter(Boolean).join(' · ')}),
+    bq,
+    long ? h('button',{type:'button',class:'more',text:'Show more',onclick:ev=>{ const c=bq.classList.toggle('clamp'); ev.target.textContent = c?'Show more':'Show less'; }}) : null,
+    d.u ? h('a',{href:d.u,target:'_blank',rel:'noopener noreferrer',text:'Original document ↗'}) : null
+  );
+  return card;
+}
+function addUser(text){ const el = h('div',{class:'msg user',text}); log.append(el); showEl(el); }
+function addBot(){
+  const answer = h('div',{class:'answer'}), mode = h('div',{class:'mode'}), sources = h('div',{class:'sources'});
+  const el = h('div',{class:'msg bot'}, answer, mode, sources);
+  log.append(el); showEl(el);
+  return {el,answer,mode,sources};
+}
+
+/* ---------- answering ---------- */
+const short = d => { const t=d.d.replace(/\s+/g,' '); return t.length>70 ? t.slice(0,67).trim()+'…' : t; };
+function extractiveText(q, res){
+  if (res.overview){
+    const lines = res.hits.map((x,i)=>'• '+short(x.doc)+(x.doc.y>=1950?' ('+x.doc.y+')':'')+' ['+(i+1)+']');
+    return 'These are some of the documents about '+res.hits[0].doc.c+' in the database:\n'+lines.join('\n');
+  }
+  const picks = engine.extract(q, res.hits, res.terms, 4);
+  if (!picks.length){
+    const x = res.hits[0];
+    return 'The closest passage is from '+short(x.doc)+' ('+x.doc.c+'). Open the first card to read it. [1]';
+  }
+  return 'Here is what the closest passages say:\n'+picks.map(p=>{
+    const d = res.hits[p.hi].doc;
+    return '• '+d.c+', '+short(d)+(d.y>=1950?' ('+d.y+')':'')+': '+p.s+' ['+(p.hi+1)+']';
+  }).join('\n');
+}
+function clip(t, n){ const w = t.split(/\s+/); return w.length>n ? w.slice(0,n).join(' ')+' …' : t; }
+function buildPrompt(q, hits, hist){
+  const ctx = hits.map((x,i)=>'['+(i+1)+'] '+x.doc.c+' | '+x.doc.d+(x.doc.y>=1950?' ('+x.doc.y+')':'')+' | '+(x.p.label||(x.p.pg?'page '+x.p.pg:'summary'))+'\n'+clip(x.p.t,170)).join('\n\n');
+  return 'You are Rada, a research assistant for climate law and policy. Answer the question using ONLY the numbered passages below.\n'
+   +'Rules: cite passages inline like [1] or [2][3] right after the claims they support; write 3 to 6 sentences of plain prose with no markdown, no bullet points and no headings; '
+   +'passages are machine-extracted text and may contain typos or cut-off sentences; passages marked "summary" are editors\' summaries of whole documents; never add facts the passages do not support; '
+   +'the documents are from a 2022 snapshot, so say "as of the 2022 documents" when stating what a law requires; if the passages only partly answer the question, say what they cover and what is missing; '
+   +'if they do not answer it, say so plainly; when comparing countries, name each country explicitly. If the question is a follow-up, use the conversation for context but still cite only the passages.\n\n'
+   +(hist.length ? 'CONVERSATION SO FAR\n'+hist.map(t=>'User: '+t.q+'\nRada: '+t.a.replace(/\[\d+\]/g,'').slice(0,500)).join('\n')+'\n\n' : '')
+   +'PASSAGES\n'+ctx+'\n\nQUESTION: '+q;
+}
+function speakable(text){
+  let t = text.replace(/\[\d+\]/g,'').replace(/^•\s*/gm,'').replace(/\n+/g,'. ').replace(/\s+/g,' ').replace(/\.\s*\./g,'.').trim();
+  if (t.length>700){ const k = t.lastIndexOf('. ',700); t = t.slice(0, k>200?k+1:700); }
+  return t;
+}
+function glossRules(){ return parseGloss($('glossary').value); }
+async function ask(q){
+  q = q.trim(); if (!engine || busy || !q) return;
+  busy = true; $('send').disabled = true; $('mic').disabled = true; stopSpeech();
+  addUser(q); setState('thinking');
+  const bot = addBot();
+  await new Promise(r=>setTimeout(r,20));
+  const toks = tokenize(q).length;
+  const cue = /^\s*(and|also|then|what about|how about|what of|why)\b|\b(it|they|them|those|that|this|there)\b/i.test(q);
+  const follow = history.length>0 && toks<=3 && (cue || (engine.detectCountries(q).length>0 && toks<=2));
+  const qEff = follow ? q+' '+history[history.length-1].q : q;
+  const res = engine.search(qEff, {gloss:glossRules(), countries:selCountries, cats:selCats});
+  if (!res.hits.length){
+    let msg;
+    if (res.countryMiss) msg = 'I could not find anything about that for '+res.countryMiss.join(' and ')+' in the loaded documents. Try rewording, or check the country filter.';
+    else msg = 'The loaded documents do not cover that. The database holds national climate laws, policies and plans, so try asking about a specific law, policy, country or topic such as adaptation, emissions targets or climate finance.';
+    bot.answer.textContent = msg; bot.mode.textContent = 'No matching passages';
+    setState('idle'); busy = false; $('send').disabled = false; $('mic').disabled = false; return;
+  }
+  const stems = new Set(res.terms);
+  const cards = res.hits.map((x,i)=>sourceCard(x,i+1,stems));
+  cards.forEach(c=>bot.sources.append(c));
+  bot.answer.textContent = 'Reading '+res.hits.length+' passages…';
+  let text = '', usedClaude = false;
+  try {
+    const sample = (window.claude && window.claude.use) ? await window.claude.use('sample') : null;
+    if (sample){
+      const r = await sample(buildPrompt(q,res.hits,history.slice(-2)),{cache:false,modelTier:'default',onText:({text:t})=>{ renderAnswer(bot.answer,t,cards); }});
+      text = (r.text||'').trim(); usedClaude = !!text;
+    }
+  } catch(e){ text = ''; }
+  if (!text) text = extractiveText(q, res);
+  renderAnswer(bot.answer, text, cards);
+  history.push({q, a:text, srcs:res.hits.map((x,i)=>'['+(i+1)+'] '+x.doc.c+', '+x.doc.d+' '+(x.p.label||(x.p.pg?'p.'+x.p.pg:'summary'))+(x.doc.u?' '+x.doc.u:''))});
+  const notes = [];
+  if (res.filter && res.filter.length && !selCountries.size) notes.push('Searched '+res.filter.map(k=>engine.countries.get(k)).join(' and ')+' only, as named in your question.');
+  bot.mode.textContent = (usedClaude
+    ? 'Written by Claude from the '+res.hits.length+' passages below. Check the sources before relying on it.'
+    : 'Search-only answer: the sentences are taken from the passages below, not written by an AI.') + (notes.length?' '+notes.join(' '):'');
+  showEl(bot.el);
+  busy = false; $('send').disabled = false; $('mic').disabled = false;
+  speak(speakable(text));
+  if (!voiceOn()) setState('idle');
+}
+
+
+/* ---------- voice input (Web Speech API; needs microphone permission from the host page) ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false, heard = '', sentByVoice = false;
+function micSay(t){ $('micMsg').textContent = t || ''; }
+function micLang(){ let v=''; try{ v = localStorage.getItem('rada.vlang'); }catch(e){} return v || navigator.language || 'en-US'; }
+function micUi(on){
+  listening = on; $('mic').setAttribute('aria-pressed', on?'true':'false');
+  $('mic').setAttribute('aria-label', on?'Stop listening':'Ask by voice'); $('mic').title = on?'Stop listening':'Ask by voice';
+}
+const MIC_BLOCKED = 'The microphone is switched off in this page view, so voice cannot start here. Use your device’s dictation instead: the microphone key on a phone keyboard, Fn twice on a Mac, or Win+H on Windows. Or open the page directly in Chrome or Edge.';
+const MIC_ERR = {
+  'not-allowed': MIC_BLOCKED, 'service-not-allowed': MIC_BLOCKED,
+  'no-speech': 'I did not hear anything. Tap the microphone and try again.',
+  'audio-capture': 'No microphone was found. Check that one is connected and allowed for this site.',
+  'network': 'Speech recognition needs an internet connection and could not reach its service.',
+  'language-not-supported': 'This browser cannot recognise that language. Pick another voice language in Search settings.'
+};
+function stopListening(){ if (rec){ try{ rec.stop(); }catch(e){} } }
+function startListening(){
+  if (!SR || busy || listening) return;
+  stopSpeech(); micSay(''); heard = ''; sentByVoice = false;
+  let r;
+  try{ r = new SR(); }catch(e){ micSay(MIC_BLOCKED); return; }
+  rec = r; r.lang = micLang(); r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+  r.onstart = ()=>{ micUi(true); setState('listening'); $('q').value=''; $('q').placeholder='Listening… speak your question'; };
+  r.onresult = ev=>{
+    let txt = '', fin = false;
+    for (let i=0;i<ev.results.length;i++){ txt += ev.results[i][0].transcript; if (ev.results[i].isFinal) fin = true; }
+    heard = txt.trim(); $('q').value = heard;
+    if (fin && heard && !sentByVoice){ sentByVoice = true; try{ r.stop(); }catch(e){} }
+  };
+  r.onerror = ev=>{ micSay(MIC_ERR[ev.error] || ('Voice input stopped ('+ev.error+'). You can still type your question.')); heard = ''; };
+  r.onend = ()=>{
+    micUi(false); $('q').placeholder = 'Ask about a law, policy or plan…'; rec = null;
+    if (avState==='listening') setState('idle');
+    if (heard && !busy){ sentByVoice = true; $('form').requestSubmit(); }
+  };
+  try{ r.start(); }catch(e){ micUi(false); micSay(MIC_BLOCKED); }
+}
+if (SR){
+  $('mic').hidden = false; $('vlangBox').hidden = false;
+  try{ $('vlang').value = localStorage.getItem('rada.vlang') || ''; }catch(e){}
+  $('vlang').addEventListener('change',()=>{ try{ localStorage.setItem('rada.vlang', $('vlang').value); }catch(e){} });
+  $('mic').addEventListener('click',()=>{ listening ? stopListening() : startListening(); });
+  document.addEventListener('keydown',e=>{ if (e.key==='Escape' && listening) stopListening(); });
+} else {
+  micSay('');
+}
+
+/* ---------- controls ---------- */
+$('form').addEventListener('submit',e=>{ e.preventDefault(); const q=$('q').value; $('q').value=''; ask(q); });
+$('q').addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); $('form').requestSubmit(); } });
+document.querySelectorAll('#cats .chip').forEach(b=>b.addEventListener('click',()=>{
+  const c=b.dataset.cat; selCats.has(c)?selCats.delete(c):selCats.add(c); b.setAttribute('aria-pressed',selCats.has(c)?'true':'false');
+}));
+function renderCountryChips(){
+  const box=$('countries'); box.textContent='';
+  [...selCountries].forEach(k=>{
+    box.append(h('button',{type:'button',class:'chip rm','aria-label':'Remove '+engine.countries.get(k),text:engine.countries.get(k),onclick:()=>{ selCountries.delete(k); renderCountryChips(); }}));
+  });
+}
+$('cin').addEventListener('change',()=>{
+  const v=$('cin').value.trim().toLowerCase(); if(!engine||!v) return;
+  for (const [k,c] of engine.countries){ if (c.toLowerCase()===v){ selCountries.add(k); $('cin').value=''; renderCountryChips(); return; } }
+});
+$('cin').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('cin').dispatchEvent(new Event('change')); } });
+const DEFAULT_GLOSS = "ndc = nationally determined contribution contributions paris\nnet zero = net-zero neutrality carbon neutral 2050\nadaptation = adaptive resilience vulnerability\nmitigation = emissions reduction renewable\nclimate finance = fund funding financing green climate fund\ncarbon market = carbon trading emissions trading offset credit\ncarbon tax = carbon price pricing levy\nflood = flooding floods inundation\ndrought = water scarcity\nglacier = glacial snow himalaya\nearly warning = forecast alert meteorological\ndisaster = disaster risk reduction hazard\ninstitution = council authority commission committee ministry\ncoordinate = coordination inter-agency committee council\ncoordination = coordinate inter-agency committee council\nlocal government = municipal provincial district community\ngender = women gender equality\nrenewable = solar wind hydropower geothermal biomass\nredd = forest deforestation carbon\nloss and damage = loss damage vulnerable climate";
+const gloss = $('glossary');
+gloss.value = store.get('rada.gloss') || DEFAULT_GLOSS;
+let gt; gloss.addEventListener('input',()=>{ clearTimeout(gt); gt=setTimeout(()=>store.set('rada.gloss',gloss.value),400); });
+$('resetGloss').addEventListener('click',()=>{ gloss.value = DEFAULT_GLOSS; store.set('rada.gloss',DEFAULT_GLOSS); });
+$('copy').addEventListener('click',async()=>{
+  if (!history.length){ $('copyMsg').textContent = 'Ask a question first.'; return; }
+  const text = history.map(t=>'Q: '+t.q+'\nA: '+t.a+'\nSources:\n'+t.srcs.join('\n')).join('\n\n---\n\n');
+  const box = $('copyBox');
+  try { await navigator.clipboard.writeText(text); box.hidden = true; $('copyMsg').textContent = 'Copied. Paste it into a message to share feedback.'; }
+  catch(e){ box.value = text; box.hidden = false; box.focus(); box.select(); $('copyMsg').textContent = 'Copy is blocked here. Select the text below and copy it.'; }
+});
+
+/* ---------- data loading ---------- */
+async function loadCorpus(onProgress){
+  const res = await fetch('corpus.gz.b64.txt');
+  if (!res.ok) throw new Error('HTTP '+res.status);
+  const total = +res.headers.get('content-length') || 7600000;
+  const reader = res.body.getReader(); const dec = new TextDecoder(); let b64 = '', got = 0;
+  for (;;){ const {done,value} = await reader.read(); if (done) break; got += value.length; b64 += dec.decode(value,{stream:true}); onProgress(Math.min(0.85, got/total*0.85)); }
+  b64 = b64.replace(/\s+/g,'');
+  const bin = atob(b64); const buf = new Uint8Array(bin.length);
+  for (let i=0;i<bin.length;i++) buf[i] = bin.charCodeAt(i);
+  onProgress(0.9);
+  if (buf[0]!==0x1f || buf[1]!==0x8b) throw new Error('data file is not valid');
+  if (typeof DecompressionStream==='undefined') throw new Error('this browser cannot unpack the data file; please use a current Chrome, Edge, Safari or Firefox');
+  const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const text = await new Response(stream).text();
+  onProgress(0.95);
+  return JSON.parse(text);
+}
+const SUGGEST = [
+  "What does Pakistan's National Climate Change Policy say about glaciers and floods?",
+  "Which law created the Pakistan Climate Change Authority?",
+  "Compare how Kenya and Pakistan coordinate climate action across government",
+  "What are Germany's emissions reduction targets?",
+  "Which countries have a carbon tax?"
+];
+function greet(){
+  const bot = addBot();
+  bot.answer.textContent = 'Hi, I am Rada. Ask me about national climate laws, policies and plans. I search the documents, answer from the passages I find, and show where each claim comes from.';
+  const sg = h('div',{class:'sugg'});
+  SUGGEST.forEach(s=>sg.append(h('button',{type:'button',text:s,onclick:()=>ask(s)})));
+  bot.sources.replaceWith(sg);
+}
+(async function init(){
+  try {
+    setState('thinking','Loading documents');
+    const corpus = await loadCorpus(p=>{ $('loadfill').style.width = (p*100).toFixed(0)+'%'; });
+    $('scope').textContent = 'Building the search index…';
+    await new Promise(r=>setTimeout(r,40));
+    engine = new Engine(corpus);
+    $('loadfill').style.width = '100%';
+    const nd = engine.D.length, np = engine.N, nc = engine.countries.size;
+    $('scope').textContent = 'Database: '+nd.toLocaleString()+' laws, policies and plans from '+nc+' countries and regions, '+np.toLocaleString()+' searchable passages. Climate Policy Radar open data, 2022 snapshot.';
+    $('corpusInfo').textContent = nd.toLocaleString()+' documents, '+np.toLocaleString()+' passages, '+nc+' countries and regions.';
+    $('loadbar').hidden = true;
+    const dl = $('clist'); [...engine.countries.values()].sort().forEach(c=>dl.append(h('option',{value:c})));
+    $('q').disabled = false; $('send').disabled = false; $('mic').disabled = false;
+    if (matchMedia('(max-width: 820px)').matches) $('tools').open = false;
+    setState('idle'); greet();
+  } catch(err){
+    $('loadbar').hidden = true; setState('idle','Not loaded');
+    $('scope').textContent = 'Could not load the document database ('+(err && err.message ? err.message : 'unknown error')+'). Reload the page to try again.';
+  }
+})();
+window.__rada = {player, VIS, drawMouth, get engine(){ return engine; }, speak, setState, stopSpeech};
+</script>
