@@ -203,6 +203,7 @@ form.composer textarea{flex:1;min-width:0;font:15px/1.4 var(--f-body);background
             <div class="chips" id="cats">
               <button type="button" class="chip" data-cat="Law" aria-pressed="false">Laws</button>
               <button type="button" class="chip" data-cat="Policy" aria-pressed="false">Policies and plans</button>
+              <button type="button" class="chip" data-cat="Project" aria-pressed="false" id="projChip" hidden>Fund projects</button>
             </div>
           </div>
           <div>
@@ -211,6 +212,9 @@ form.composer textarea{flex:1;min-width:0;font:15px/1.4 var(--f-body);background
             <input type="text" id="cin" list="clist" placeholder="Type a country, press Enter" autocomplete="off">
             <datalist id="clist"></datalist>
             <div class="chips" id="countries" style="margin-top:8px"></div>
+          </div>
+          <div class="drawer" style="padding:8px 0">
+            <label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px"><input type="checkbox" id="funds" style="margin-top:3px"><span>Also search climate-fund projects (Green Climate Fund and Global Environment Facility)<br><span class="small" id="fundsNote">Optional. Adds about 3,300 project documents and downloads about 6 MB more.</span></span></label>
           </div>
           <div class="drawer" id="vlangBox" hidden style="padding:8px 0">
             <label class="small" for="vlang">Voice language (for asking by microphone)</label>
@@ -728,7 +732,7 @@ function drawMouth(m){
 
 /* ---------- avatar: animation loop ---------- */
 const player = new Player();
-let avState = 'idle';
+let avState = 'idle'; let baseCorpus = null, fundsCorpus = null;
 let cur = {...VIS.rest}, blinkV = 0, nextBlink = performance.now()+2200, blinkStart = -1;
 let gx = 0, gy = 0, browV = 0, lastT = performance.now(), silentDone = null;
 const KEYS = ['open','wide','round','tuck','press','tongue','smile'];
@@ -987,6 +991,50 @@ async function ask(q){
 }
 
 
+
+/* ---------- optional second data set: GCF and GEF project documents ---------- */
+function refreshScope(){
+  const nd = engine.D.length, np = engine.N, nc = engine.countries.size;
+  const on = $('funds').checked;
+  $('scope').textContent = 'Database: '+nd.toLocaleString()+' documents ('+(on?'laws, policies, plans and climate-fund projects':'laws, policies and plans')+') from '+nc+' countries and regions, '+np.toLocaleString()+' searchable passages. Climate Policy Radar open data.';
+  $('corpusInfo').textContent = nd.toLocaleString()+' documents, '+np.toLocaleString()+' passages, '+nc+' countries and regions.';
+  const dl = $('clist'); dl.textContent=''; [...engine.countries.values()].sort().forEach(c=>dl.append(h('option',{value:c})));
+}
+function mergeCorpus(a,b){
+  const off = a.docs.length;
+  return {v:2, src:a.src, docs:a.docs.concat(b.docs), p:a.p.concat(b.p.map(r=>{ const x=r.slice(); x[0]+=off; return x; }))};
+}
+$('funds').addEventListener('change', async e=>{
+  if (!baseCorpus || busy) { e.target.checked = !e.target.checked; return; }
+  const on = e.target.checked;
+  busy = true; $('send').disabled = true; $('mic').disabled = true; $('funds').disabled = true; stopSpeech();
+  try{
+    if (on){
+      if (!fundsCorpus){
+        $('loadbar').hidden = false; $('loadfill').style.width = '0%'; setState('thinking','Loading fund projects');
+        $('scope').textContent = 'Loading climate-fund project documents…';
+        fundsCorpus = await loadCorpus(p=>{ $('loadfill').style.width=(p*100).toFixed(0)+'%'; }, 'corpus_funds.gz.b64.txt');
+      }
+      $('scope').textContent = 'Building the search index…'; setState('thinking','Indexing');
+      await new Promise(r=>setTimeout(r,40));
+      engine = new Engine(mergeCorpus(baseCorpus, fundsCorpus));
+      $('projChip').hidden = false;
+    } else {
+      setState('thinking','Indexing'); await new Promise(r=>setTimeout(r,40));
+      engine = new Engine(baseCorpus);
+      selCats.delete('Project'); $('projChip').hidden = true; $('projChip').setAttribute('aria-pressed','false');
+    }
+    refreshScope(); $('fundsNote').textContent = on ? 'On: fund projects are included. Use the Type chips above to show only laws, only policies, or only fund projects.' : 'Optional. Adds about 3,300 project documents and downloads about 6 MB more.';
+    setState('idle');
+  } catch(err){
+    e.target.checked = false; fundsCorpus = null; if (baseCorpus) engine = new Engine(baseCorpus);
+    $('projChip').hidden = true; refreshScope(); setState('idle');
+    $('fundsNote').textContent = 'Could not load the fund projects ('+(err && err.message ? err.message : 'error')+'). Search continues with laws and policies only.';
+  } finally {
+    $('loadbar').hidden = true; busy = false; $('send').disabled = false; $('mic').disabled = false; $('funds').disabled = false;
+  }
+});
+
 /* ---------- voice input (Web Speech API; needs microphone permission from the host page) ---------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null, listening = false, heard = '', sentByVoice = false;
@@ -1067,8 +1115,8 @@ $('copy').addEventListener('click',async()=>{
 });
 
 /* ---------- data loading ---------- */
-async function loadCorpus(onProgress){
-  const res = await fetch('corpus.gz.b64.txt');
+async function loadCorpus(onProgress, file){
+  const res = await fetch(file || 'corpus.gz.b64.txt');
   if (!res.ok) throw new Error('HTTP '+res.status);
   const total = +res.headers.get('content-length') || 7600000;
   const reader = res.body.getReader(); const dec = new TextDecoder(); let b64 = '', got = 0;
@@ -1104,6 +1152,7 @@ function greet(){
     const corpus = await loadCorpus(p=>{ $('loadfill').style.width = (p*100).toFixed(0)+'%'; });
     $('scope').textContent = 'Building the search index…';
     await new Promise(r=>setTimeout(r,40));
+    baseCorpus = corpus;
     engine = new Engine(corpus);
     $('loadfill').style.width = '100%';
     const nd = engine.D.length, np = engine.N, nc = engine.countries.size;
