@@ -232,7 +232,7 @@ form.composer textarea{flex:1;min-width:0;font:15px/1.4 var(--f-body);background
           <details class="drawer">
             <summary>About the data</summary>
             <p class="small" id="corpusInfo"></p>
-            <p class="small">Source: Climate Policy Radar open data, a 2022 snapshot of national laws and policies, licensed CC BY 4.0. Texts are machine-extracted from the original documents and may contain errors. Laws and policies may have changed since 2022. The Paris Agreement excerpts come from the UNFCCC text.</p>
+            <p class="small">Source: Climate Policy Radar open data: national laws and policies (published up to 2025), plus NDCs, long-term strategies and adaptation plans, licensed CC BY 4.0. For each document the page searches a selection of its most relevant passages, not every page. Texts are machine-extracted from the original documents and may contain errors. Laws and policies may have changed since this data export. The Paris Agreement excerpts come from the UNFCCC text.</p>
           </details>
         </div>
       </details>
@@ -931,7 +931,7 @@ function buildPrompt(q, hits, hist){
   return 'You are Rada, a research assistant for climate law and policy. Answer the question using ONLY the numbered passages below.\n'
    +'Rules: cite passages inline like [1] or [2][3] right after the claims they support; write 3 to 6 sentences of plain prose with no markdown, no bullet points and no headings; '
    +'passages are machine-extracted text and may contain typos or cut-off sentences; passages marked "summary" are editors\' summaries of whole documents; never add facts the passages do not support; '
-   +'the documents are from a 2022 snapshot, so say "as of the 2022 documents" when stating what a law requires; if the passages only partly answer the question, say what they cover and what is missing; '
+   +'the documents are a Climate Policy Radar data export and may not include the latest changes, so say "according to the documents" when stating what a law requires, and do not claim that something does not exist, only that the passages do not show it; if the passages only partly answer the question, say what they cover and what is missing; '
    +'if they do not answer it, say so plainly; when comparing countries, name each country explicitly. If the question is a follow-up, use the conversation for context but still cite only the passages.\n\n'
    +(hist.length ? 'CONVERSATION SO FAR\n'+hist.map(t=>'User: '+t.q+'\nRada: '+t.a.replace(/\[\d+\]/g,'').slice(0,500)).join('\n')+'\n\n' : '')
    +'PASSAGES\n'+ctx+'\n\nQUESTION: '+q;
@@ -1107,7 +1107,7 @@ function greet(){
     engine = new Engine(corpus);
     $('loadfill').style.width = '100%';
     const nd = engine.D.length, np = engine.N, nc = engine.countries.size;
-    $('scope').textContent = 'Database: '+nd.toLocaleString()+' laws, policies and plans from '+nc+' countries and regions, '+np.toLocaleString()+' searchable passages. Climate Policy Radar open data, 2022 snapshot.';
+    $('scope').textContent = 'Database: '+nd.toLocaleString()+' laws, policies and plans from '+nc+' countries and regions, '+np.toLocaleString()+' searchable passages. Climate Policy Radar open data (laws and policies to 2025, NDCs, long-term strategies, adaptation plans).';
     $('corpusInfo').textContent = nd.toLocaleString()+' documents, '+np.toLocaleString()+' passages, '+nc+' countries and regions.';
     $('loadbar').hidden = true;
     const dl = $('clist'); [...engine.countries.values()].sort().forEach(c=>dl.append(h('option',{value:c})));
